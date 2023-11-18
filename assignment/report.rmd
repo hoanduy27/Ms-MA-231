@@ -1,0 +1,39 @@
+---
+title: "Assignment"
+author: Group 7
+date: Nov 18, 2023
+output: 
+    html_document:
+        # latex_engine: xelatex
+        toc: true
+        toc_depth: 2
+---
+
+```{r setup, include=FALSE} 
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+library(ggplot2)
+library(FactoMineR)
+library(readxl)
+library(httpgd)
+```
+
+```{r}
+df <- read.csv("wine.data")
+colnames(df) <- c(
+    "class",
+    "Alcohol",
+    "Malic.acid",
+    "Ash",
+    "Alcalinity.of.ash",
+    "Magnesium",
+    "Total.phenols",
+    "Flavanoids",
+    "Nonflavanoid.phenols",
+    "Proanthocyanins",
+    "Color.intensity",
+    "Hue",
+    "OD280/OD315.of.diluted.wines",
+    "Proline"
+)
+```
