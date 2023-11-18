@@ -1,0 +1,67 @@
+---
+title: "MFA"
+author: Group X
+date: Nov 11, 2023
+output: 
+    html_document:
+        # latex_engine: xelatex
+        toc: true
+        toc_depth: 2
+---
+
+```{r setup, include=FALSE} 
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+library(ggplot2)
+library(FactoMineR)
+library(readxl)
+library(httpgd)
+```
+
+```{r}
+df <- read.csv("decathlon.csv", sep=";")
+rownames(df) <- df$X 
+
+df <- subset(df, select=-X)
+
+
+cor(df[, c(1:12)])
+
+pairs(df[, c(1:12)])
+```
+
+```{r}
+df.pca = PCA(
+  df, 
+  quanti.sup = c("Rang", "Points"), 
+  quali.sup = "Competition",
+  graph = F
+)
+```
+
+```{r}
+plot.PCA(df.pca, choix="ind", habillage = "Competition", select="cos2 0.4")
+```
+
+```{r}
+plot.PCA(df.pca, axes=c(1,3), choix="ind", habillage = "Competition", select="cos2 0.4")
+```
+
+```{r}
+plot.PCA(df.pca, axes=c(1,4), choix="ind", habillage = "Competition", select="cos2 0.4")
+```
+
+```{r}
+plot.PCA(df.pca, axes=c(1,2), choix="var", habillage = "Competition", select="cos2 0.4")
+```
+
+```{r}
+plot.PCA(df.pca, axes=c(1,3), choix="var", habillage = "Competition", select="cos2 0.4")
+```
+```{r}
+plot.PCA(df.pca, axes=c(2,3), choix="var", habillage = "Competition", select="cos2 0.4")
+```
+
+```{r}
+plot.PCA(df.pca, axes=c(1,4), choix="var", habillage = "Competition", select="cos2 0.4")
+```
