@@ -14,51 +14,127 @@ output:
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 library(ggplot2)
 library(FactoMineR)
-library(readxl)
+library(factoextra)
+library(FactoMineR)
+library(Factoshiny)
 library(httpgd)
 ```
 
+# Data mining
+
 ```{r}
-df <- read.csv("decathlon.csv", sep=";")
-rownames(df) <- df$X 
+df <- read.csv(
+  "decathlon.csv", 
+  row.names=1, 
+  sep=";"
+)
 
-df <- subset(df, select=-X)
+# Prepare data
 
+df$Competition <- as.factor(df$Competition)
+
+# Normalize data
+
+df.norm <- data.frame(scale(df[,1:10]), df[,11:13])
 
 cor(df[, c(1:12)])
 
 pairs(df[, c(1:12)])
 ```
 
+# Apply PCA
 ```{r}
-df.pca = PCA(
-  df, 
+res.pca <- PCA(
+  df.norm, 
   quanti.sup = c("Rang", "Points"), 
   quali.sup = "Competition",
   graph = F
 )
 ```
 
+# Eigenvalues
+## Eigenevalues table
 ```{r}
-plot.PCA(df.pca, choix="ind", habillage = "Competition", select="cos2 0.4")
+  res.pca$eig[1:5, ]
 ```
 
+## Eigenvalues plot 
 ```{r}
-plot.PCA(df.pca, axes=c(1,3), choix="ind", habillage = "Competition", select="cos2 0.4")
+  fviz_eig(res.pca)
 ```
 
+First four components have a eigenvalue value of greater than 1.
+
+However, the first two dimension comprising more than 50% of the total variability of the cloud of individuals (or variables) is represented by the plane, it is adequate to expresses a significant structure in the data.
+
+# Individuals
+## Plot
 ```{r}
-plot.PCA(df.pca, axes=c(1,4), choix="ind", habillage = "Competition", select="cos2 0.4")
+plot.PCA(
+  res.pca, 
+  axes = c(1,2),
+  choix = "ind", 
+  invisible = c("quali", "var"),
+  select = "cos2 0.4",
+  unselect = 0.8
+)
 ```
 
+-   Observation:
+
+Highly correlated to dim1 than dim2: MAYER, WIESIOLEK, LELIEVRE
+
+Highly correlated to dim2 than dim1: Kaul, Suarez, Zhuk, GADO
+
+$\Rightarrow$ Interpretation:
+
+## By Points
 ```{r}
-plot.PCA(df.pca, axes=c(1,2), choix="var", habillage = "Competition", select="cos2 0.4")
+  plot.PCA(
+    res.pca, 
+    axes = c(1,2),
+    choix = "ind", 
+    habillage = "Points", 
+    invisible = c("quali", "var"),
+    select = "cos2 0.4",
+    unselect = 0.8
+  )
 ```
 
+-   Observation:
+
+Individuals positively correlated to dim 1 has the highest scores, and ones with negative correlation to dim 1 has lowest scores.
+
+$\Rightarrow$ Interpretation:
+
+## By Competition
 ```{r}
-plot.PCA(df.pca, axes=c(1,3), choix="var", habillage = "Competition", select="cos2 0.4")
+  plot.PCA(
+    res.pca, 
+    axes = c(1,2),
+    choix = "ind", 
+    habillage = "Competition", 
+    invisible = c("quali", "var"),
+    select = "cos2 0.4",
+    unselect = 0.8
+  )
 ```
 
+# Variables
+## Plot
+
 ```{r}
-plot.PCA(df.pca, axes=c(1,4), choix="var", habillage = "Competition", select="cos2 0.4")
+  plot(res.pca,
+     axes = c(1, 2),
+     choix="var",
+     hab="none",
+     invisible = c("quali", "ind"),
+     select="cos2 0.4",
+     unselect=0.8
+  )
+
 ```
+
+-   Observation:
+
+$\Rightarrow$ Interpretation:
