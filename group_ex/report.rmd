@@ -9,7 +9,7 @@ output:
         toc_depth: 2
 ---
 
-```{r setup, include=FALSE} 
+```{r setup, include=FALSE}
 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 library(ggplot2)
@@ -43,6 +43,7 @@ pairs(df[, c(1:12)])
 ```
 
 # Apply PCA
+
 ```{r}
 res.pca <- PCA(
   df.norm, 
@@ -53,12 +54,15 @@ res.pca <- PCA(
 ```
 
 # Eigenvalues
+
 ## Eigenevalues table
+
 ```{r}
   res.pca$eig[1:5, ]
 ```
 
-## Eigenvalues plot 
+## Eigenvalues plot
+
 ```{r}
   fviz_eig(res.pca)
 ```
@@ -68,7 +72,9 @@ First four components have a eigenvalue value of greater than 1.
 However, the first two dimension comprising more than 50% of the total variability of the cloud of individuals (or variables) is represented by the plane, it is adequate to expresses a significant structure in the data.
 
 # Individuals
+
 ## Plot
+
 ```{r}
 plot.PCA(
   res.pca, 
@@ -89,6 +95,7 @@ Highly correlated to dim2 than dim1: Kaul, Suarez, Zhuk, GADO
 $\Rightarrow$ Interpretation:
 
 ## By Points
+
 ```{r}
   plot.PCA(
     res.pca, 
@@ -108,6 +115,7 @@ Individuals positively correlated to dim 1 has the highest scores, and ones with
 $\Rightarrow$ Interpretation:
 
 ## By Competition
+
 ```{r}
   plot.PCA(
     res.pca, 
@@ -121,6 +129,7 @@ $\Rightarrow$ Interpretation:
 ```
 
 # Variables
+
 ## Plot
 
 ```{r}
