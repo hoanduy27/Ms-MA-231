@@ -147,3 +147,107 @@ $\Rightarrow$ Interpretation:
 -   Observation:
 
 $\Rightarrow$ Interpretation:
+
+# Main axes of PCA
+
+```{r}
+  res.km <- kmeans(res.pca$var$coord, centers = 3, nstart=25)
+  grp <- as.factor(res.km$cluster)
+  plot.PCA(res.pca, choix="var", col.var=grp, select="cos2 0.3")
+  # fviz_pca_var(res.pca, axes=c(3,4), repel=T, col.var=grp)
+```
+
+## 1st dimension
+
+From the plot of correlation, we can see that most running subjects (**X100m**, **X400m** and **X110.haies**) contribute significantly to the first dimension of PCA. Those subjects have high cos2 (higher than 0.5) and strong negative correlation to this dimension. Another observation is that **Range** (quantitative supplementary variable) also have high cos2 and strong negative correlation to dimension 1, whereas **Points** (another quantitative supplementary variable) demonstrates nearly perfect positive correlation with the 1st dimension and cos2 is very close to 1.0 (0.97). We can interpret that, the less time an athelete requires to complete a run, the more likely they are to gain higher points. Furthermore, Longueur have high cos2 in the main axes and almost lies in the opposite side of running subjects, indicating that an atheletes who are good at running also good at Longeur.
+
+Let demonstrate the above observation by plotting some individual plots
+
+```{r}
+  plot.PCA(res.pca, habillage ="X100m", select="cos2 0.4")
+  plot.PCA(res.pca, habillage ="X110m.haies", select="cos2 0.4")
+  plot.PCA(res.pca, habillage ="Longueur", select="cos2 0.4")
+  plot.PCA(res.pca, habillage ="Points", select="cos2 0.4")
+```
+
+As can be seen from these plots, from left to right of dimension 1, the time needed by an athelete to complete **100m run** or **110m haies run** *decreases*. In **Longueur** plot, athelete in the right of dimension 1 exhibit better performance (higher distance) comparing to those on the left. The point gained by athelte on the right side of dimension 1 is higher than those on the left.
+
+For example, MAYER, Clayer and Warner both have good achievement in 100m Running, 110m Haies Running and Longueur. They also gained high points and top range, as shown below (comparing to Schawarzl, Kaul that in the middle of the axes and NILSSON, BARAN who are in the left side).
+
+```{r}
+  df[
+    c('MAYER', 'Clay', 'Warner', 'Schwarzl', 'Kaul', 'NILSSON', 'BARAN'), 
+    c('X100m', 'X110m.haies', 'Longueur', 'Points', 'Rang')
+  ]
+```
+
+To conclusion, the first dimension of PCA represent performance of atheletes on **running subjects** and **Longueur**. This dimension also represent the **point** and the **range** of an athelete.
+
+## 2nd dimension
+
+The dimension 2 of PCA, however, does not well represent any subject. Some subjects that have *relatively high* cos2 to this dimension are mainly throwing sports such as **Javelot** (cos2=0.34), **Disque** (cos2=0.22) and **Poids** (cos2=0.17). Some sports also contribute fairly much to this dimension are X100m (cos2=0.29) and Longueur (cos2=0.24). Those subjects also have **high cos2 with the first dimension**. Because of that, atheletes that have high performance on those subject are positioned not only on the top of dimension 2, but also on the right of dimension 1, as can be seen from the following individual plots:
+
+```{r}
+  plot.PCA(res.pca, habillage ="Javelot", select="cos2 0.4")
+  plot.PCA(res.pca, habillage ="Disque", select="cos2 0.4")
+  plot.PCA(res.pca, habillage ="Poids", select="cos2 0.4")
+```
+
+Let choose some individuals to see their performance:\
+
+-   Kaul, Suarez, Zhuk: Top of dimension 2.
+-   Sebrle, Clay, MAYER: Right of dimension 1.
+-   WIESIOLEK: Left of dimension 1, In the middle of dimension 2.
+-   Warners: In the middle of dimension 1, Bottom of dimension 2.
+
+```{r}
+  df[
+    c("Kaul", "Suarez", "Zhuk", "Sebrle", "Clay", "MAYER", "WIESIOLEK", "Warners"), 
+    c("Javelot", "Disque", "Poids", "Longueur", "Points", "Rang")]
+```
+
+As we can see, Kaul, Suarez and Zhuk have better performance in **Javelot** and **Disque** than WIESIOLEK and Warners, who are in lower positions in dimension 2 and low position in dimension 1. Warners, despite being at the low position of dimension 2, still have similar performance in Poids to Kaul, Suarez and Zhuk since he is further to the right in dimension 1 than those three. However, Kaul, Suarez and Zhuk are not as good in **Disque** and **Poids** as Sebrle, Clay and MAYER, who are in lower positions in dimension 2 but on the right side of dimension 1.
+
+We can conclude that, dimension 2 can somehow represents athelete performance in **throwing sports** and **Longueur** as people in the top position in this dimension tend to achieve *above-average performance* in these sports.
+
+## 3rd dimension
+
+Using `dimdesc`, we can get 4 variables that are well represented on dimension 3,
+
+```{r}
+  dimdesc(res.pca)$`Dim.3`
+```
+
+which are: **X1500m**, **Disque**, **Perche** and **X400m**. The variable PCA plot below can also demonstrate it.
+
+```{r}
+  plot.PCA(
+    res.pca, 
+    choix="var", 
+    axes=c(2,3), 
+    invisible = "quanti.sup", 
+    select="cos2 0.2"
+  )
+```
+
+Let plot individual plot using those variable as habillage:
+
+```{r}
+  plot.PCA(res.pca, axes=c(2,3), habillage ="X1500m", select="cos2 0.4")
+  plot.PCA(res.pca, axes=c(2,3), habillage ="Disque", select="cos2 0.4")
+  plot.PCA(res.pca, axes=c(2,3), habillage ="Perche", select="cos2 0.4")
+  plot.PCA(res.pca, axes=c(2,3), habillage ="X400m", select="cos2 0.4")
+  
+```
+
+We can clearly see that athelete positioned at the top of dimension 3 have better performance on X1500m, X400m, Disque, Perche. We can validate this by considering 4 atheletes:\
+- Duckworth, Ziemek: Top position of dimension 3 - Cairoli, Bourrada: Bottom position of dimension 3
+
+```{r}
+  df[
+      c("Duckworth", "Ziemek", "Cairoli", "Bourrada"), 
+      c("X1500m", "X400m", "Disque", "Perche")
+  ]
+```
+
+As we can see, Duckworth and Ziemek outperform Cairoli and Bourrada on almost listed sports, except that Duckworth is worse than Bourrada in **Disque**. This is due to cos2 of **Disque** on dimension 2 and dimension 3 are similar (0.22 and 0.19) and athelete performance on this sport is positive correlated on both of 2 dimensions, which means athelete are on the right side of dimension 2 or on the top of dimension 3 tend to have higher performance on Disque. As we can see in individual plot, although Duckworth lies higher than Bourrada on dimension 3, he lies further to the left in dimension 2 than Bourrada. This can explain why Duckworth performance on Disque are not so different than that of Bourrada.
