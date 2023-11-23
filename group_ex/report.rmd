@@ -275,3 +275,29 @@ res.pca$var$coord
 * Ngoài ra, chúng ta thấy rằng các môn thể thao gắn liền với thành phần chính đầu tiên nhất (có giá trị coord gần 1 hoặc -1) gồm: Longueur, Disque, Poids, X100m, X400m, X110m.haies. Như vậy, những người chiến thắng mười môn phối hợp xuất sắc trong những môn có tương quan chặt chẽ với thành phần chính thứ nhất vừa được liệt kê.
 
 * Tương tự, các môn thể thao ít có ảnh hưởng đến thành tích (số điểm) sẽ có tương quan thấp đối với trục thứ nhất, gồm: Perche và X1500.
+
+## **o	So sánh thành tích đạt được ở 4 cuộc thi. Bạn có thể nói gì về thành tích trung bình trong cuộc thi này?**
+```{r}
+plot(res.pca,
+     axes = c(1, 2),
+     choix="ind",
+     hab="Competition",
+     invisible = c("var","quanti"),
+     select=NULL,
+     unselect=0.8
+     )
+
+plotellipses(res.pca, label="none")
+```
+
+Ở mức độ tin cậy 0.95, các hình elip độ tin cậy có sự phân ra về hai phía bên phải (JO04 và JO16) và bên trái (Decastar18 và CE18). Quan sát trên có thể chỉ ra rằng các cuộc thi mười môn phối hợp và hệ thống tính điểm có sự ưu tiên với một số môn thể thao có quan hệ chặt chẽ với thành phần chính thứ nhất, trong đó phần lớn vận động viên có sự thể hiện tốt hơn trong các kì thi JO04 và JO08. 
+
+Ngoài ra, giữa JO04 và JO16, có các hình elip độ tin cậy trùng nhau, vì vậy chúng gần như giống hệt nhau, nhưng có khác biệt giữa hai cuộc thi này với Decastar18 và CE18.
+
+Giữa Decastar18 và CE18 có sự trùng lấp không quá lớn, cho nên giữa hai kì thi vẫn có một phần khác biệt.
+
+```{r}
+plotellipses(res.pca, label="none", level = .5)
+```
+
+Ở mức độ tin cậy 0.50, các khoảng tin cậy của JO04 và JO18 vẫn chồng lấp, trong khi của Decastar18 và CE18 bị phân tách.
