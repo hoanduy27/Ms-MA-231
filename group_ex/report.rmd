@@ -251,3 +251,30 @@ We can clearly see that athelete positioned at the top of dimension 3 have bette
 ```
 
 As we can see, Duckworth and Ziemek outperform Cairoli and Bourrada on almost listed sports, except that Duckworth is worse than Bourrada in **Disque**. This is due to cos2 of **Disque** on dimension 2 and dimension 3 are similar (0.22 and 0.19) and athelete performance on this sport is positive correlated on both of 2 dimensions, which means athelete are on the right side of dimension 2 or on the top of dimension 3 tend to have higher performance on Disque. As we can see in individual plot, although Duckworth lies higher than Bourrada on dimension 3, he lies further to the left in dimension 2 than Bourrada. This can explain why Duckworth performance on Disque are not so different than that of Bourrada.
+
+## **o	So sánh thành tích đạt được ở 4 cuộc thi. Bạn có thể nói gì về thành tích trung bình trong cuộc thi này?**
+
+```{r}
+plot(res.pca,
+     axes = c(1, 2),
+     choix="ind",
+     hab="Competition",
+     invisible = c("var","quanti"),
+     select=NULL,
+     unselect=0.8
+     )
+
+plotellipses(res.pca, label="none")
+```
+
+Ở mức độ tin cậy 0.95, các hình elip độ tin cậy có sự phân ra về hai phía bên phải (JO04 và JO16) và bên trái (Decastar18 và CE18). Quan sát trên có thể chỉ ra rằng các cuộc thi mười môn phối hợp và hệ thống tính điểm có sự ưu tiên với một số môn thể thao có quan hệ chặt chẽ với thành phần chính thứ nhất, trong đó phần lớn vận động viên có sự thể hiện tốt hơn trong các kì thi JO04 và JO08. 
+
+Ngoài ra, giữa JO04 và JO16, có các hình elip độ tin cậy trùng nhau, vì vậy chúng gần như giống hệt nhau, nhưng có khác biệt giữa hai cuộc thi này với Decastar18 và CE18.
+
+Giữa Decastar18 và CE18 có sự trùng lấp không quá lớn, cho nên giữa hai kì thi vẫn có một phần khác biệt.
+
+```{r}
+plotellipses(res.pca, label="none", level = .5)
+```
+
+Ở mức độ tin cậy 0.50, các khoảng tin cậy của JO04 và JO18 vẫn chồng lấp, trong khi của Decastar18 và CE18 bị phân tách.
