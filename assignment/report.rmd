@@ -37,3 +37,55 @@ colnames(df) <- c(
     "Proline"
 )
 ```
+
+#Quantity & Meaning
+
+```{r}
+variables <- colnames(df)
+# Examine the elements, identify the measurement quantity and type of scale
+for (variable in variables) {
+  unique_values <- unique(df[[variable]])
+  num_unique_values <- length(unique_values)
+ ## Quantity and meaning
+  if (is.numeric(df[[variable]])) {
+    quantity <- "Measured Quantity"
+    meaning <- "Numeric Value"
+  } else if (is.character(df[[variable]])) {
+    quantity <- "Measured Quantity"
+    meaning <- "Categorical Value"
+  } else {
+    quantity <- "Unknown"
+    meaning <- "Unknown"
+  }
+  
+  ##Measurement quantity
+  if (data_type %in% c("numeric", "integer", "double")) {
+    measurement_quantity <- "Numerical"
+  } else if (data_type %in% c("character", "factor")) {
+    measurement_quantity <- "Categorical"
+  } else {
+    measurement_quantity <- "Unknown"
+  }
+  
+  ##Scale type & Measurement type
+  if (data_type %in% c("numeric", "integer", "double")) {
+    scale_type <- ifelse(length(unique(df[[variable]])) > 10, "Continuous", "Discrete")
+    measurement_type <- "Quantitative"
+  } else if (data_type %in% c("character", "factor")) {
+    scale_type <- "Qualitative"
+    measurement_type <- "Qualitative"
+  } else {
+    scale_type <- "Unknown"
+    measurement_type <- "Unknown"
+  }
+  
+  print(paste("Variable:", variable))
+  print(paste("Quantity:", quantity))
+  print(paste("Meaning:", meaning))
+  print(paste("Number of Unique Values:", num_unique_values))
+  print(paste("Measurement Quantity:", measurement_quantity))
+  print(paste("Scale Type:", scale_type))
+  print(paste("Measurement Type:", measurement_type))
+  print("------------------------------")
+}
+```
