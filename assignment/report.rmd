@@ -38,7 +38,7 @@ colnames(df) <- c(
 )
 ```
 
-#Quantity & Meaning
+# Quantity & Meaning
 
 ```{r}
 variables <- colnames(df)
@@ -89,3 +89,65 @@ for (variable in variables) {
   print("------------------------------")
 }
 ```
+
+## Hypothesis Formulation:
+
+### Hypothesis 1: 
+
+#### Research Hypotheses:
+
+* "There are significant differences in the mean alcohol content among the three types of wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "The mean alcohol content across the three types of wines is equal."
+
+* Alternative Hypothesis (H1): "The mean alcohol content differs significantly among the three types of wines."
+
+### Hypothesis 2:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "There exists a significant relationship between the total phenol content and the color intensity of wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "There is no significant correlation between the total phenol content and the color intensity of wines."
+
+* Alternative Hypothesis (H1): "There is a significant correlation between the total phenol content and the color intensity of wines."
+
+### Hypothesis 3:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "The mean levels of proanthocyanins differ across the three types of wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "The mean levels of proanthocyanins are equal across the three types of wines."
+
+* Alternative Hypothesis (H1): "At least one of the mean levels of proanthocyanins differs significantly among the three types of wines."
+
+### Hypothesis 4:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "There is a significant difference in the mean levels of flavonoids between wines with low and high alcohol content."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "The mean levels of flavonoids are the same between wines with low and high alcohol content."
+
+* Alternative Hypothesis (H1): "There is a significant difference in the mean levels of flavonoids between wines with low and high alcohol content."
+
+### Hypothesis 5:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "The ash content has a positive correlation with the alcalinity of ash in wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "There is no correlation between the ash content and the alcalinity of ash in wines."
+
+* Alternative Hypothesis (H1): "There is a positive correlation between the ash content and the alcalinity of ash in wines."
