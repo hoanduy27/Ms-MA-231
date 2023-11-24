@@ -37,3 +37,117 @@ colnames(df) <- c(
     "Proline"
 )
 ```
+
+# Quantity & Meaning
+
+```{r}
+variables <- colnames(df)
+# Examine the elements, identify the measurement quantity and type of scale
+for (variable in variables) {
+  unique_values <- unique(df[[variable]])
+  num_unique_values <- length(unique_values)
+ ## Quantity and meaning
+  if (is.numeric(df[[variable]])) {
+    quantity <- "Measured Quantity"
+    meaning <- "Numeric Value"
+  } else if (is.character(df[[variable]])) {
+    quantity <- "Measured Quantity"
+    meaning <- "Categorical Value"
+  } else {
+    quantity <- "Unknown"
+    meaning <- "Unknown"
+  }
+  
+  ##Measurement quantity
+  if (data_type %in% c("numeric", "integer", "double")) {
+    measurement_quantity <- "Numerical"
+  } else if (data_type %in% c("character", "factor")) {
+    measurement_quantity <- "Categorical"
+  } else {
+    measurement_quantity <- "Unknown"
+  }
+  
+  ##Scale type & Measurement type
+  if (data_type %in% c("numeric", "integer", "double")) {
+    scale_type <- ifelse(length(unique(df[[variable]])) > 10, "Continuous", "Discrete")
+    measurement_type <- "Quantitative"
+  } else if (data_type %in% c("character", "factor")) {
+    scale_type <- "Qualitative"
+    measurement_type <- "Qualitative"
+  } else {
+    scale_type <- "Unknown"
+    measurement_type <- "Unknown"
+  }
+  
+  print(paste("Variable:", variable))
+  print(paste("Quantity:", quantity))
+  print(paste("Meaning:", meaning))
+  print(paste("Number of Unique Values:", num_unique_values))
+  print(paste("Measurement Quantity:", measurement_quantity))
+  print(paste("Scale Type:", scale_type))
+  print(paste("Measurement Type:", measurement_type))
+  print("------------------------------")
+}
+```
+
+## Hypothesis Formulation:
+
+### Hypothesis 1: 
+
+#### Research Hypotheses:
+
+* "There are significant differences in the mean alcohol content among the three types of wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "The mean alcohol content across the three types of wines is equal."
+
+* Alternative Hypothesis (H1): "The mean alcohol content differs significantly among the three types of wines."
+
+### Hypothesis 2:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "There exists a significant relationship between the total phenol content and the color intensity of wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "There is no significant correlation between the total phenol content and the color intensity of wines."
+
+* Alternative Hypothesis (H1): "There is a significant correlation between the total phenol content and the color intensity of wines."
+
+### Hypothesis 3:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "The mean levels of proanthocyanins differ across the three types of wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "The mean levels of proanthocyanins are equal across the three types of wines."
+
+* Alternative Hypothesis (H1): "At least one of the mean levels of proanthocyanins differs significantly among the three types of wines."
+
+### Hypothesis 4:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "There is a significant difference in the mean levels of flavonoids between wines with low and high alcohol content."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "The mean levels of flavonoids are the same between wines with low and high alcohol content."
+
+* Alternative Hypothesis (H1): "There is a significant difference in the mean levels of flavonoids between wines with low and high alcohol content."
+
+### Hypothesis 5:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "The ash content has a positive correlation with the alcalinity of ash in wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "There is no correlation between the ash content and the alcalinity of ash in wines."
+
+* Alternative Hypothesis (H1): "There is a positive correlation between the ash content and the alcalinity of ash in wines."

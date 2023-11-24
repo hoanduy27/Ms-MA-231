@@ -9,8 +9,49 @@ output:
         toc_depth: 2
 ---
 
-```{r setup, include=FALSE}
+# Data description
 
+```{r}
+decathlon_data <- read.csv(
+  "decathlon.csv", 
+  row.names=1, 
+  sep=";"
+)
+
+#Variables and individuals
+variables <- colnames(decathlon_data[, 1:10])
+individuals <- rownames(decathlon_data[, 1:10])
+print(paste("Variables:", paste(variables, collapse = ", ")))
+print(paste("Individuals:", paste(individuals, collapse = ", ")))
+```
+
+# Purpose of PCA
+
+=> PCA aims to identify the most influential events contributing to athletes overall success. By extracting key patterns and relationships among the 10 events, PCA facilitates dimensionality reduction, revealing which competitions significantly impact final rankings. This allows for a concise representation of athletes performance profiles, aiding in visualization, pattern recognition, and the identification of critical features shaping decathlon outcomes overall success.
+
+# Scale
+
+```{r}
+scaled_data <- scale(decathlon_data[,1:10])
+
+scaled_df <- data.frame(scaled_data, decathlon_data[, (ncol(decathlon_data)-1):(ncol(decathlon_data))])
+
+print(scaled_df)
+```
+
+This process involves transforming the data so that it has a mean of 0 and a standard deviation of 1. This is to ensures that all variables are on a comparable scale, preventing one variable from dominating the analysis due to its larger magnitude.
+Data reduction through standardization is crucial in the decathlon analysis because it enables fair and meaningful comparisons between events, ensures the sensitivity of PCA, and enhances the interpretability and visual analysis of athlete performance profiles.
+
+# Calculate the correlation matrix
+
+```{r}
+cor_matrix <- round(cor(scaled_data), 2)
+print(cor_matrix)
+```
+
+# Applying PCA on data
+
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 library(ggplot2)
 library(FactoMineR)
@@ -21,7 +62,7 @@ library(httpgd)
 library(reshape2)
 ```
 
-# Data mining
+## Data mining
 
 ```{r}
 df <- read.csv(
@@ -43,7 +84,7 @@ cor(df[, c(1:12)])
 pairs(df[, c(1:12)])
 ```
 
-# Apply PCA
+## Apply PCA
 
 ```{r}
 res.pca <- PCA(
@@ -54,15 +95,15 @@ res.pca <- PCA(
 )
 ```
 
-# Eigenvalues
+## Eigenvalues
 
-## Eigenevalues table
+### Eigenevalues Table
 
 ```{r}
   res.pca$eig[1:5, ]
 ```
 
-## Eigenvalues plot
+### Eigenvalues Plot
 
 ```{r}
   fviz_eig(res.pca)
@@ -72,9 +113,9 @@ First four components have a eigenvalue value of greater than 1.
 
 However, the first two dimension comprising more than 50% of the total variability of the cloud of individuals (or variables) is represented by the plane, it is adequate to expresses a significant structure in the data.
 
-# Individuals
+## Individuals
 
-## Plot
+### General Plot
 
 ```{r}
 plot.PCA(
@@ -93,9 +134,7 @@ Highly correlated to dim1 than dim2: MAYER, WIESIOLEK, LELIEVRE
 
 Highly correlated to dim2 than dim1: Kaul, Suarez, Zhuk, GADO
 
-$\Rightarrow$ Interpretation:
-
-## By Points
+### By Points
 
 ```{r}
   plot.PCA(
@@ -113,9 +152,7 @@ $\Rightarrow$ Interpretation:
 
 Individuals positively correlated to dim 1 has the highest scores, and ones with negative correlation to dim 1 has lowest scores.
 
-$\Rightarrow$ Interpretation:
-
-## By Competition
+### By Competition
 
 ```{r}
   plot.PCA(
@@ -129,9 +166,9 @@ $\Rightarrow$ Interpretation:
   )
 ```
 
-# Variables
+## Variables
 
-## Plot
+### General Plot
 
 ```{r}
   plot(res.pca,
@@ -145,11 +182,9 @@ $\Rightarrow$ Interpretation:
 
 ```
 
--   Observation:
+# Interpretating PCA results
 
-$\Rightarrow$ Interpretation:
-
-# Main axes of PCA
+## Main axes of PCA
 
 ```{r}
   res.km <- kmeans(res.pca$var$coord, centers = 3, nstart=25)
@@ -158,7 +193,7 @@ $\Rightarrow$ Interpretation:
   # fviz_pca_var(res.pca, axes=c(3,4), repel=T, col.var=grp)
 ```
 
-## 1st dimension
+### 1st dimension
 
 From the plot of correlation, we can see that most running subjects (**X100m**, **X400m** and **X110.haies**) contribute significantly to the first dimension of PCA. Those subjects have high cos2 (higher than 0.5) and strong negative correlation to this dimension. Another observation is that **Range** (quantitative supplementary variable) also have high cos2 and strong negative correlation to dimension 1, whereas **Points** (another quantitative supplementary variable) demonstrates nearly perfect positive correlation with the 1st dimension and cos2 is very close to 1.0 (0.97). We can interpret that, the less time an athelete requires to complete a run, the more likely they are to gain higher points. Furthermore, Longueur have high cos2 in the main axes and almost lies in the opposite side of running subjects, indicating that an atheletes who are good at running also good at Longeur.
 
@@ -184,7 +219,7 @@ For example, MAYER, Clayer and Warner both have good achievement in 100m Running
 
 To conclusion, the first dimension of PCA represent performance of atheletes on **running subjects** and **Longueur**. This dimension also represent the **point** and the **range** of an athelete.
 
-## 2nd dimension
+### 2nd dimension
 
 The dimension 2 of PCA, however, does not well represent any subject. Some subjects that have *relatively high* cos2 to this dimension are mainly throwing sports such as **Javelot** (cos2=0.34), **Disque** (cos2=0.22) and **Poids** (cos2=0.17). Some sports also contribute fairly much to this dimension are X100m (cos2=0.29) and Longueur (cos2=0.24). Those subjects also have **high cos2 with the first dimension**. Because of that, atheletes that have high performance on those subject are positioned not only on the top of dimension 2, but also on the right of dimension 1, as can be seen from the following individual plots:
 
@@ -211,7 +246,7 @@ As we can see, Kaul, Suarez and Zhuk have better performance in **Javelot** and 
 
 We can conclude that, dimension 2 can somehow represents athelete performance in **throwing sports** and **Longueur** as people in the top position in this dimension tend to achieve *above-average performance* in these sports.
 
-## 3rd dimension
+### 3rd dimension
 
 Using `dimdesc`, we can get 4 variables that are well represented on dimension 3,
 
@@ -253,7 +288,7 @@ We can clearly see that athelete positioned at the top of dimension 3 have bette
 
 As we can see, Duckworth and Ziemek outperform Cairoli and Bourrada on almost listed sports, except that Duckworth is worse than Bourrada in **Disque**. This is due to cos2 of **Disque** on dimension 2 and dimension 3 are similar (0.22 and 0.19) and athelete performance on this sport is positive correlated on both of 2 dimensions, which means athelete are on the right side of dimension 2 or on the top of dimension 3 tend to have higher performance on Disque. As we can see in individual plot, although Duckworth lies higher than Bourrada on dimension 3, he lies further to the left in dimension 2 than Bourrada. This can explain why Duckworth performance on Disque are not so different than that of Bourrada.
 
-## **o	Những người chiến thắng mười môn phối hợp xuất sắc trong những môn nào? Tồn tại trường hợp môn thi nào ít có ảnh hưởng đến thành tích (số điểm) trong mười môn phối hợp không? (MAYER, Eaton, Sebrle, Mayer, Clay, Warner, Abele)**
+## In what activities do decathlon winners excel? Is there a case where any competition has the least impact on performance (Points) in the decathlon?
 
 ```{r}
 plot(res.pca,
@@ -266,17 +301,18 @@ plot(res.pca,
      )
 ```
 
-* Chúng ta thấy rằng trên đồ thị vòng tròn tương quan có biến bổ sung “Points” gần như thẳng hàng với dimension thứ nhất. Điều này có nghĩa là những người giành chiến thắng trong mười môn phối hợp đã thể hiện tốt trong các môn thể thao có tương quan cao với thành phần chính đầu tiên.
+* We see that on the correlation circle graph there is an additional variable “Points” that is almost aligned with the first dimension. This means that decathlon winners performed well in sports that were highly correlated with the first principal component.
 
 ```{r}
 res.pca$var$coord
 ```
 
-* Ngoài ra, chúng ta thấy rằng các môn thể thao gắn liền với thành phần chính đầu tiên nhất (có giá trị coord gần 1 hoặc -1) gồm: Longueur, Disque, Poids, X100m, X400m, X110m.haies. Như vậy, những người chiến thắng mười môn phối hợp xuất sắc trong những môn có tương quan chặt chẽ với thành phần chính thứ nhất vừa được liệt kê.
+* In addition, we see that the sports most closely associated with the first principal component (with coord values near 1 or -1) include: Longueur, Disque, Poids, X100m, X400m, X110m.haies. Thus, decathlon winners excel in activities that are strongly correlated with the first principal component aforementioned.
 
-* Tương tự, các môn thể thao ít có ảnh hưởng đến thành tích (số điểm) sẽ có tương quan thấp đối với trục thứ nhất, gồm: Perche và X1500.
+* Similarly, sports that have little impact on performance (Points) will have a low correlation with the first axis, including: Perche and X1500.
 
-## **o	So sánh thành tích đạt được ở 4 cuộc thi. Bạn có thể nói gì về thành tích trung bình trong cuộc thi này?**
+## Compare achievements in 4 competitions. What can you say about the average performance in this competition?
+
 ```{r}
 plot(res.pca,
      axes = c(1, 2),
@@ -290,14 +326,41 @@ plot(res.pca,
 plotellipses(res.pca, label="none")
 ```
 
-Ở mức độ tin cậy 0.95, các hình elip độ tin cậy có sự phân ra về hai phía bên phải (JO04 và JO16) và bên trái (Decastar18 và CE18). Quan sát trên có thể chỉ ra rằng các cuộc thi mười môn phối hợp và hệ thống tính điểm có sự ưu tiên với một số môn thể thao có quan hệ chặt chẽ với thành phần chính thứ nhất, trong đó phần lớn vận động viên có sự thể hiện tốt hơn trong các kì thi JO04 và JO08. 
+At the 0.95 confidence level, the confidence ellipses split to the right (JO04 and JO16) and left (Decastar18 and CE18). The above observation may indicate that decathlon competitions and scoring systems favor a number of sports closely related to the first principal component, in which the majority of athletes have better performance in the JO04 and JO08. 
 
-Ngoài ra, giữa JO04 và JO16, có các hình elip độ tin cậy trùng nhau, vì vậy chúng gần như giống hệt nhau, nhưng có khác biệt giữa hai cuộc thi này với Decastar18 và CE18.
+Additionally, between JO04 and JO16, there are overlapping confidence ellipses, so they are almost identical, but there are differences between these two competitions with Decastar18 and CE18.
 
-Giữa Decastar18 và CE18 có sự trùng lấp không quá lớn, cho nên giữa hai kì thi vẫn có một phần khác biệt.
+There is not too much overlap between Decastar18 and CE18, so there is still a difference between the two exams.
 
 ```{r}
 plotellipses(res.pca, label="none", level = .5)
 ```
 
-Ở mức độ tin cậy 0.50, các khoảng tin cậy của JO04 và JO18 vẫn chồng lấp, trong khi của Decastar18 và CE18 bị phân tách.
+At the 0.50 confidence level, the confidence intervals for JO04 and JO18 still overlap, while those for Decastar18 and CE18 are separated.
+
+
+
+```{r}
+library(FactoMineR)
+res.PCA <- PCA(decathlon, quali.sup = 13, quanti.sup = c(11,12), graph = TRUE, ncp = 8)
+summary(res.PCA)
+```
+
+## Who are the top 5 athletes who performed best on the main principle component?
+
+From the PCA above, we can deduce the top 5 outstanding athletes on the main plane are Sebrle, Clay, Karpov, Macey, and Warners because all five of them have higher overall scores in dimensions 1, 2, and 3 compared to the others.
+
+## Who are the athletes who contributed the most to building the first principle component of the ACP? And in the second? What does that significant contribution mean?
+
+The athlete who contributes the most to the construction of the first principal axis of PCA is MAYER.
+The athlete who contributes the most to the construction of the second principal axis of PCA is NILSSON.
+This suggests that MAYER has a higher score in more events compared to NILSSON, who has a high score in fewer events.
+
+## From the correlation circle, what can be said about the following correlations:
+
+From the correlation circle:
++ 100m hurdles - 400m hurdles: they have a very small angle between them -> The athletes' scores in these two events have a similar difference.
++ 100m - Long jump: they are opposite to each other by 180 degrees -> These two events represent two unrelated fields, but the angle with the point representing the scores in both events is very small.
++ Disque - Poids: they are close to each other in terms of angles towards the points -> These two events have a high correlation in dimension 1.
++ Disque - Long jump: they are on the same side of the point but symmetrically across dimension 1 by approximately 90 degrees -> These two events are not correlated.
++ Longueur - 1500m: they are opposite to each other by 180 degrees -> These two events represent two unrelated fields, but the scores in both events are very high.
