@@ -36,6 +36,8 @@ colnames(df) <- c(
     "OD280/OD315.of.diluted.wines",
     "Proline"
 )
+
+df$class <- as.factor(df$class)
 ```
 
 # Quantity & Meaning
@@ -151,6 +153,83 @@ for (variable in variables) {
 * Null Hypothesis (H0): "There is no correlation between the ash content and the alcalinity of ash in wines."
 
 * Alternative Hypothesis (H1): "There is a positive correlation between the ash content and the alcalinity of ash in wines."
+
+# Duy
+
+Comments: 
+- Missing value: I would process the same as Quang's
+- Outlier detection & removal: kinda similar to Quang's, but should wrap in `for loop`
+- Plots: 
+
+## Outlier detection & removal
+```{r}
+outliers = rep(FALSE, nrow(df))
+
+for (col in colnames(df)){
+  if (col != "class"){
+    Q1 <- quantile(df[, col], 0.25)
+    Q3 <- quantile(df[, col], 0.75)
+    IQR <- Q3 - Q1
+
+    # Identify outliers
+    outliers <- (outliers | (
+                        df[, col] < (Q1 - 1.5 * IQR) 
+                        | df[, col] > (Q3 + 1.5 * IQR) 
+                    ))
+
+  }
+}
+
+print("Outliers:")
+print(df[outliers, ])
+
+df.clean <- df[!outliers, ]
+
+```
+
+## Plots 
+-- Boxplot 
+```{r}
+for (col in colnames(df.clean)){
+  if (col != 'class'){
+    # boxplot(df.clean[, col], main=col)
+    boxplot(df.clean[, col] ~ df.clean[, 'class'], xlab='class', ylab=col) 
+  }
+}
+```
+
+-- Histogram 
+```{r}
+for (col in colnames(df.clean)){
+  if(col != 'class'){
+    hist(df.clean[, col], xlab=col)
+  }
+  else{
+    barplot(table(df.clean[, col]), xlab=col, ylab='frequency')
+  }
+
+    
+
+}
+```
+
+
+-- Scatter plot (pair)
+```{r}
+  pairs(
+    subset(df.clean, select=-class),
+    col = hcl.colors(3, "Temps")[df.clean[, 'class']],
+    cex=0.5,
+  )
+```
+
+
+-- Clustering
+```{r}
+  feat = scale(subset(df.clean, select=-class ))
+  var_clust <- hclust((dist(t(feat))), method='ward.D')
+  plot(var_clust)
+```
 
 #Quang's Code
 ## Check for Missing values in data
