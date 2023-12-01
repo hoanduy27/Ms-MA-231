@@ -37,3 +37,324 @@ colnames(df) <- c(
     "Proline"
 )
 ```
+
+# Quantity & Meaning
+
+```{r}
+variables <- colnames(df)
+# Examine the elements, identify the measurement quantity and type of scale
+for (variable in variables) {
+  unique_values <- unique(df[[variable]])
+  num_unique_values <- length(unique_values)
+ ## Quantity and meaning
+  if (is.numeric(df[[variable]])) {
+    quantity <- "Measured Quantity"
+    meaning <- "Numeric Value"
+  } else if (is.character(df[[variable]])) {
+    quantity <- "Measured Quantity"
+    meaning <- "Categorical Value"
+  } else {
+    quantity <- "Unknown"
+    meaning <- "Unknown"
+  }
+  
+  ##Measurement quantity
+  if (data_type %in% c("numeric", "integer", "double")) {
+    measurement_quantity <- "Numerical"
+  } else if (data_type %in% c("character", "factor")) {
+    measurement_quantity <- "Categorical"
+  } else {
+    measurement_quantity <- "Unknown"
+  }
+  
+  ##Scale type & Measurement type
+  if (data_type %in% c("numeric", "integer", "double")) {
+    scale_type <- ifelse(length(unique(df[[variable]])) > 10, "Continuous", "Discrete")
+    measurement_type <- "Quantitative"
+  } else if (data_type %in% c("character", "factor")) {
+    scale_type <- "Qualitative"
+    measurement_type <- "Qualitative"
+  } else {
+    scale_type <- "Unknown"
+    measurement_type <- "Unknown"
+  }
+  
+  print(paste("Variable:", variable))
+  print(paste("Quantity:", quantity))
+  print(paste("Meaning:", meaning))
+  print(paste("Number of Unique Values:", num_unique_values))
+  print(paste("Measurement Quantity:", measurement_quantity))
+  print(paste("Scale Type:", scale_type))
+  print(paste("Measurement Type:", measurement_type))
+  print("------------------------------")
+}
+```
+
+## Hypothesis Formulation:
+
+### Hypothesis 1: 
+
+#### Research Hypotheses:
+
+* "There are significant differences in the mean alcohol content among the three types of wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "The mean alcohol content across the three types of wines is equal."
+
+* Alternative Hypothesis (H1): "The mean alcohol content differs significantly among the three types of wines."
+
+### Hypothesis 2:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "There exists a significant relationship between the total phenol content and the color intensity of wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "There is no significant correlation between the total phenol content and the color intensity of wines."
+
+* Alternative Hypothesis (H1): "There is a significant correlation between the total phenol content and the color intensity of wines."
+
+### Hypothesis 3:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "The mean levels of proanthocyanins differ across the three types of wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "The mean levels of proanthocyanins are equal across the three types of wines."
+
+* Alternative Hypothesis (H1): "At least one of the mean levels of proanthocyanins differs significantly among the three types of wines."
+
+### Hypothesis 4:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "There is a significant difference in the mean levels of flavonoids between wines with low and high alcohol content."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "The mean levels of flavonoids are the same between wines with low and high alcohol content."
+
+* Alternative Hypothesis (H1): "There is a significant difference in the mean levels of flavonoids between wines with low and high alcohol content."
+
+### Hypothesis 5:
+
+#### Research Hypotheses:
+
+* Research Hypothesis: "The ash content has a positive correlation with the alcalinity of ash in wines."
+
+#### Statistical Hypotheses:
+
+* Null Hypothesis (H0): "There is no correlation between the ash content and the alcalinity of ash in wines."
+
+* Alternative Hypothesis (H1): "There is a positive correlation between the ash content and the alcalinity of ash in wines."
+
+#Quang's Code
+## Check for Missing values in data
+```{r}
+# Check for missing values
+missing_values <- colSums(is.na(df))
+
+# Print columns with missing values
+print(missing_values[missing_values > 0])
+
+# Handle missing values (replace with mean, median, or remove rows/columns)
+for (column in names(df)) {
+  if (sum(is.na(df[[column]])) > 0) {
+    if (is.numeric(df[[column]])) {
+      # Replace with mean
+      df[[column]][is.na(df[[column]])] <- mean(df[[column]], na.rm = TRUE)
+    } else {
+      # Replace with mode
+      mode_val <- names(sort(table(df[[column]]), decreasing = TRUE)[1])
+      df[[column]][is.na(df[[column]])] <- mode_val
+    }
+  }
+}
+
+# Check if missing values are handled
+print(colSums(is.na(df)))
+```
+
+## 2. Incorrect Entries (Outliers and Errors)
+```{r}
+# 2. Incorrect Entries (Outliers and Errors)
+# Check for outliers using IQR method
+Q1 <- quantile(df$column_name, 0.25)
+Q3 <- quantile(df$column_name, 0.75)
+IQR <- Q3 - Q1
+
+# Identify outliers
+outliers <- df$column_name < (Q1 - 1.5 * IQR) | df$column_name > (Q3 + 1.5 * IQR)
+
+# Print outliers
+print(df[outliers, ])
+
+# Handle outliers (remove or replace with a threshold)
+# Remove outliers
+df <- df[!outliers, ]
+
+# Replace outliers with a threshold
+threshold_value <- 10  # Adjust the threshold as needed
+df$column_name[outliers] <- threshold_value
+```
+
+## 3. Scale
+```{r}
+# 3. Scale
+# Standardize the variables
+df_standardized <- as.data.frame(scale(df))
+
+# Normalize the variables
+df_normalized <- as.data.frame(scale(df, center = FALSE))
+```
+
+
+# Code của Hà
+
+```{r, echo=FALSE, warning=FALSE}
+# Packages
+library(FactoMineR)
+library(factoextra)
+library(tidyverse)
+library(corrplot)
+library(dbplyr)
+library(ggplot2)
+
+# Import data
+data <- read.csv("wine.data", 
+                 header=FALSE, 
+                 row.names=NULL)
+
+# Setting up the data
+colnames(data) <- c("Type","Alcohol", "Malic", "Ash", "Alcalinity", "Magnesium", "Phenols", "Flavanoids", "Nonflavanoids", "Proan", "Color", "Hue", "Dilution", "Proline")
+
+data$Type <- as.factor(data$Type)
+
+# Check for null values 
+colSums(is.na(data))
+
+# Research Hypotheses
+# research_hypotheses <- c("Hypothesis 1: ...", "Hypothesis 2: ...")
+
+# Statistical Hypotheses (example for t-test)
+# Assuming 'variable1' and 'variable2' are the variables of interest
+#statistical_hypotheses <- t.test(data$variable1, data$variable2)
+
+# Multivariate Analysis Considerations
+# Assuming 'data' is your dataset
+correlation_matrix <- cor(data[-1])
+corrplot(correlation_matrix)
+# Calculate correlation matrix
+
+# Principal Component Analysis (PCA)
+res.pca <- PCA(data, scale.unit=T, quali.sup="Type", graph=F)
+
+# Multiple Correspondence Analysis (MCA)
+#mca_result <- MCA(data)
+
+# Eigenvalues
+res.pca$eig
+
+# Contribution
+dimdesc(res.pca)
+
+# Cos2
+library("corrplot")
+corrplot(res.pca$var$cos2, is.corr=F)
+
+# Individuals
+plot(res.pca,
+     choix = "ind",
+     hab = "Type",
+     invisible = c("var"),
+     select = "cos2 0.6",
+     unselect = 0.7)
+
+# Variables
+plot(res.pca,
+     choix = c("var"),
+     hab = "none",
+     invisible = c("ind"),
+     select = NULL,
+     unselect = 0.7)
+
+# Correspondence Analysis
+res.ca <- CA(data, quali.sup="Type", graph=F)
+
+plot(res.ca, 
+     invisible="col",
+     selectRow = "cos2 100",
+     unselect = 1
+     )
+
+plot(res.ca, 
+     invisible="row",
+     selectCol = NULL,
+     unselect = 1
+     )
+
+# Thử Multiple Factor Analysis (MFA)
+gr1 = data[1]
+gr2 = data.frame(data[7:10], data[13])
+gr3 = data.frame(data[2], data[11])
+gr4 = data.frame(data[12], data[14])
+gr5 = data[6]
+gr6 = data[3]
+data.cat = data.frame(gr1, gr2, gr3, gr4, gr5, gr6)
+
+res.mfa <- MFA(data.cat,
+               group = c(1, 5, 2, 2, 1, 1),
+               type = c("n", rep("c",5)),
+               name.group = c("Group1", "Group2", "Group3", "Group4", "Group5","Group6"),
+               num.group.sup = c(1),
+               graph = F)
+```
+
+
+#Create histograms, box plots, scatter plots (Quang's code)
+```{r}
+library(ggplot2)
+
+# Histogram for a numeric variable (e.g., Alcohol)
+ggplot(df, aes(x = Alcohol)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Alcohol Content", x = "Alcohol", y = "Frequency")
+
+# Box plot for a numeric variable (e.g., Alcohol by class)
+ggplot(df, aes(x = class, y = Alcohol, fill = class)) +
+  geom_boxplot() +
+  labs(title = "Box Plot of Alcohol Content by Class", x = "Class", y = "Alcohol Content")
+
+# Scatter plot for two numeric variables (e.g., Alcohol vs. Color.intensity)
+ggplot(df, aes(x = Alcohol, y = Color.intensity, color = class)) +
+  geom_point() +
+  labs(title = "Scatter Plot of Alcohol vs. Color Intensity", x = "Alcohol", y = "Color Intensity")
+```
+
+
+
+# 4. Conclusions
+Propose practical recommendations for refining or improving the data table:
+a. Check for Consistency
+
+Verify the consistency of data across columns, especially categorical variables like 'class.' Ensure that categories are labeled consistently, and there are no discrepancies or typos.
+
+b. Feature Engineering
+
+Consider creating new features that might enhance your analysis. For example, you could create interaction terms or derive new variables based on domain knowledge.
+
+c. Cross-Validation
+
+If you're planning to build predictive models, consider implementing cross-validation techniques to assess the generalization performance of your models. This can help ensure the robustness of your findings.
+
+d. Documentation
+
+Document the steps taken for data cleaning and preprocessing. This includes handling missing values, dealing with outliers, and any other modifications made to the dataset. Clear documentation enhances reproducibility and transparency.
+
+e. Regular Updates:
+
+If your dataset is periodically updated, establish a process for regular data maintenance and updates to ensure the ongoing quality of your dataset.
