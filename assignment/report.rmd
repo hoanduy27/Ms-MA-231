@@ -152,6 +152,67 @@ for (variable in variables) {
 
 * Alternative Hypothesis (H1): "There is a positive correlation between the ash content and the alcalinity of ash in wines."
 
+#Quang's Code
+## Check for Missing values in data
+```{r}
+# Check for missing values
+missing_values <- colSums(is.na(df))
+
+# Print columns with missing values
+print(missing_values[missing_values > 0])
+
+# Handle missing values (replace with mean, median, or remove rows/columns)
+for (column in names(df)) {
+  if (sum(is.na(df[[column]])) > 0) {
+    if (is.numeric(df[[column]])) {
+      # Replace with mean
+      df[[column]][is.na(df[[column]])] <- mean(df[[column]], na.rm = TRUE)
+    } else {
+      # Replace with mode
+      mode_val <- names(sort(table(df[[column]]), decreasing = TRUE)[1])
+      df[[column]][is.na(df[[column]])] <- mode_val
+    }
+  }
+}
+
+# Check if missing values are handled
+print(colSums(is.na(df)))
+```
+
+## 2. Incorrect Entries (Outliers and Errors)
+```{r}
+# 2. Incorrect Entries (Outliers and Errors)
+# Check for outliers using IQR method
+Q1 <- quantile(df$column_name, 0.25)
+Q3 <- quantile(df$column_name, 0.75)
+IQR <- Q3 - Q1
+
+# Identify outliers
+outliers <- df$column_name < (Q1 - 1.5 * IQR) | df$column_name > (Q3 + 1.5 * IQR)
+
+# Print outliers
+print(df[outliers, ])
+
+# Handle outliers (remove or replace with a threshold)
+# Remove outliers
+df <- df[!outliers, ]
+
+# Replace outliers with a threshold
+threshold_value <- 10  # Adjust the threshold as needed
+df$column_name[outliers] <- threshold_value
+```
+
+## 3. Scale
+```{r}
+# 3. Scale
+# Standardize the variables
+df_standardized <- as.data.frame(scale(df))
+
+# Normalize the variables
+df_normalized <- as.data.frame(scale(df, center = FALSE))
+```
+
+
 # Code của Hà
 
 ```{r, echo=FALSE, warning=FALSE}
@@ -252,3 +313,48 @@ res.mfa <- MFA(data.cat,
                num.group.sup = c(1),
                graph = F)
 ```
+
+
+#Create histograms, box plots, scatter plots (Quang's code)
+```{r}
+library(ggplot2)
+
+# Histogram for a numeric variable (e.g., Alcohol)
+ggplot(df, aes(x = Alcohol)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Alcohol Content", x = "Alcohol", y = "Frequency")
+
+# Box plot for a numeric variable (e.g., Alcohol by class)
+ggplot(df, aes(x = class, y = Alcohol, fill = class)) +
+  geom_boxplot() +
+  labs(title = "Box Plot of Alcohol Content by Class", x = "Class", y = "Alcohol Content")
+
+# Scatter plot for two numeric variables (e.g., Alcohol vs. Color.intensity)
+ggplot(df, aes(x = Alcohol, y = Color.intensity, color = class)) +
+  geom_point() +
+  labs(title = "Scatter Plot of Alcohol vs. Color Intensity", x = "Alcohol", y = "Color Intensity")
+```
+
+
+
+# 4. Conclusions
+Propose practical recommendations for refining or improving the data table:
+a. Check for Consistency
+
+Verify the consistency of data across columns, especially categorical variables like 'class.' Ensure that categories are labeled consistently, and there are no discrepancies or typos.
+
+b. Feature Engineering
+
+Consider creating new features that might enhance your analysis. For example, you could create interaction terms or derive new variables based on domain knowledge.
+
+c. Cross-Validation
+
+If you're planning to build predictive models, consider implementing cross-validation techniques to assess the generalization performance of your models. This can help ensure the robustness of your findings.
+
+d. Documentation
+
+Document the steps taken for data cleaning and preprocessing. This includes handling missing values, dealing with outliers, and any other modifications made to the dataset. Clear documentation enhances reproducibility and transparency.
+
+e. Regular Updates:
+
+If your dataset is periodically updated, establish a process for regular data maintenance and updates to ensure the ongoing quality of your dataset.
