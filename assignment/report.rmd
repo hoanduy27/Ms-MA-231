@@ -92,67 +92,427 @@ for (variable in variables) {
 }
 ```
 
-## Hypothesis Formulation:
+# Hà
 
-### Hypothesis 1: 
+## PCA, CA
 
-#### Research Hypotheses:
+```{r, echo=FALSE, warning=FALSE}
+# Packages
+library(FactoMineR)
+library(factoextra)
+library(tidyverse)
+library(corrplot)
+library(dbplyr)
+library(ggplot2)
 
-* "There are significant differences in the mean alcohol content among the three types of wines."
+# Import data
+data <- read.csv("wine.data", 
+                 header=FALSE, 
+                 row.names=NULL)
 
-#### Statistical Hypotheses:
+# Setting up the data
+colnames(data) <- c("Type","Alcohol", "Malic", "Ash", "Alcalinity", "Magnesium", "Phenols", "Flavanoids", "Nonflavanoids", "Proan", "Color", "Hue", "Dilution", "Proline")
 
-* Null Hypothesis (H0): "The mean alcohol content across the three types of wines is equal."
+data$Type <- as.factor(data$Type)
 
-* Alternative Hypothesis (H1): "The mean alcohol content differs significantly among the three types of wines."
+# Check for null values 
+colSums(is.na(data))
 
-### Hypothesis 2:
+# Research Hypotheses
+# research_hypotheses <- c("Hypothesis 1: ...", "Hypothesis 2: ...")
 
-#### Research Hypotheses:
+# Statistical Hypotheses (example for t-test)
+# Assuming 'variable1' and 'variable2' are the variables of interest
+#statistical_hypotheses <- t.test(data$variable1, data$variable2)
 
-* Research Hypothesis: "There exists a significant relationship between the total phenol content and the color intensity of wines."
+# Multivariate Analysis Considerations
+# Assuming 'data' is your dataset
+correlation_matrix <- cor(data[-1])
+corrplot(correlation_matrix)
+# Calculate correlation matrix
 
-#### Statistical Hypotheses:
+# Principal Component Analysis (PCA)
+res.pca <- PCA(data, scale.unit=T, quali.sup="Type", graph=F)
 
-* Null Hypothesis (H0): "There is no significant correlation between the total phenol content and the color intensity of wines."
+# Multiple Correspondence Analysis (MCA)
+#mca_result <- MCA(data)
 
-* Alternative Hypothesis (H1): "There is a significant correlation between the total phenol content and the color intensity of wines."
+# Eigenvalues
+res.pca$eig
 
-### Hypothesis 3:
+# Contribution
+dimdesc(res.pca)
 
-#### Research Hypotheses:
+# Cos2
+library("corrplot")
+corrplot(res.pca$var$cos2, is.corr=F)
 
-* Research Hypothesis: "The mean levels of proanthocyanins differ across the three types of wines."
+# Individuals
+plot(res.pca,
+     choix = "ind",
+     hab = "Type",
+     invisible = c("var"),
+     select = "cos2 0.6",
+     unselect = 0.7)
 
-#### Statistical Hypotheses:
+# Variables
+plot(res.pca,
+     choix = c("var"),
+     hab = "none",
+     invisible = c("ind"),
+     select = NULL,
+     unselect = 0.7)
 
-* Null Hypothesis (H0): "The mean levels of proanthocyanins are equal across the three types of wines."
+# Correspondence Analysis
+res.ca <- CA(data, quali.sup="Type", graph=F)
 
-* Alternative Hypothesis (H1): "At least one of the mean levels of proanthocyanins differs significantly among the three types of wines."
+plot(res.ca, 
+     invisible="col",
+     selectRow = "cos2 100",
+     unselect = 1
+     )
 
-### Hypothesis 4:
+plot(res.ca, 
+     invisible="row",
+     selectCol = NULL,
+     unselect = 1
+     )
 
-#### Research Hypotheses:
+# Thử Multiple Factor Analysis (MFA)
+gr1 = data[1]
+gr2 = data.frame(data[7:10], data[13])
+gr3 = data.frame(data[2], data[11])
+gr4 = data.frame(data[12], data[14])
+gr5 = data[6]
+gr6 = data[3]
+data.cat = data.frame(gr1, gr2, gr3, gr4, gr5, gr6)
 
-* Research Hypothesis: "There is a significant difference in the mean levels of flavonoids between wines with low and high alcohol content."
+res.mfa <- MFA(data.cat,
+               group = c(1, 5, 2, 2, 1, 1),
+               type = c("n", rep("c",5)),
+               name.group = c("Group1", "Group2", "Group3", "Group4", "Group5","Group6"),
+               num.group.sup = c(1),
+               graph = F)
+```
 
-#### Statistical Hypotheses:
+## Hypotheses
 
-* Null Hypothesis (H0): "The mean levels of flavonoids are the same between wines with low and high alcohol content."
+### **Hypothesis 1:** Flavanoids significantly differentiate between wine types.
 
-* Alternative Hypothesis (H1): "There is a significant difference in the mean levels of flavonoids between wines with low and high alcohol content."
+Null Hypothesis (H0): There is no significant difference in Flavanoids among different wine types.
 
-### Hypothesis 5:
+Alternative Hypothesis (H1): There is a significant difference in Flavanoids among different wine types.
 
-#### Research Hypotheses:
+   - Test: ANOVA comparing Flavanoids and Phenols among different wine types.
+   
+   - R Code:
+   
+```{r}
+     # ANOVA for Flavanoids among wine types
+     model <- lm(Flavanoids ~ as.factor(Type), data = data)
+     anova(model)
+     
+```
 
-* Research Hypothesis: "The ash content has a positive correlation with the alcalinity of ash in wines."
+#### Interpretation
 
-#### Statistical Hypotheses:
+* Interpretation 
 
-* Null Hypothesis (H0): "There is no correlation between the ash content and the alcalinity of ash in wines."
+The ANOVA test indicates a highly significant difference in Flavanoids among different wine types (p < 0.001). 
 
-* Alternative Hypothesis (H1): "There is a positive correlation between the ash content and the alcalinity of ash in wines."
+Conclusion: This suggests that Flavanoids significantly vary across the wine types.
+
+* Visualization
+
+```{r}
+
+# Boxplot for Flavanoids
+boxplot(Flavanoids ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Flavanoids Content", main = "Flavanoids Content across Wine Types")
+
+```
+
+#### Additional test
+
+* Post-hoc test for Flavanoids
+
+```{r}
+# Tukey's HSD for Flavanoids
+flavanoids_model <- aov(Flavanoids ~ as.factor(Type), data = data)
+TukeyHSD(flavanoids_model)
+```
+
+* Flavanoids Interpretation
+
+The differences in Flavanoids content between all pairs of wine types (1-2, 1-3, 2-3) are statistically significant (p < 0.001). Each pair shows a significant difference in Flavanoids levels.
+
+Flavanoids significantly vary across all three types of wines, indicating distinct levels for each wine type.
+
+
+
+### **Hypothesis 2:** Alcohol content differs significantly across wine types.
+
+Null Hypothesis (H0): There is no significant difference in Alcohol content between different wine types.
+
+Alternative Hypothesis (H1): There is a significant difference in Alcohol content between different wine types.
+
+   - Test: ANOVA for Alcohol content between different wine types.
+   
+   - R Code:
+   
+```{r}
+     # ANOVA for Alcohol among wine types
+     model <- lm(Alcohol ~ as.factor(Type), data = data)
+     anova(model)
+```
+
+#### Interpretation
+
+* Interpretation
+
+ANOVA indicates a highly significant difference in Alcohol content among different wine types (p < 0.001). This implies that the Alcohol content varies significantly across the wine types.
+
+* Visualtization
+
+```{r}
+# Boxplot for Alcohol
+boxplot(Alcohol ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Alcohol Content", main = "Alcohol Content across Wine Types")
+```
+
+#### Additional test
+
+* Post-hoc test for Alcohol
+
+```{r}
+# Tukey's HSD for Alcohol
+alcohol_model <- aov(Alcohol ~ as.factor(Type), data = data)
+TukeyHSD(alcohol_model)
+
+```
+
+* Alcohol Interpretation
+
+The differences in Alcohol content between pairs of wine types (1-2, 1-3, 2-3) are statistically significant (p < 0.001 for all pairs). Each pair exhibits a significant difference in Alcohol levels.
+
+Alcohol content significantly varies among all three types of wines, indicating distinct Alcohol levels for each wine type.
+
+
+
+### **Hypothesis 3:** Color intensity varies significantly based on wine types.
+
+Null Hypothesis (H0): There is no significant variation in Color intensity among different wine types.
+
+Alternative Hypothesis (H1): There is a significant variation in Color intensity among different wine types.
+
+   - Test: ANOVA for Color intensity among different wine types.
+   
+   - R Code:
+   
+```{r}
+     # ANOVA for Color intensity among wine types
+     model <- lm(Color ~ as.factor(Type), data = data)
+     anova(model)
+```
+
+#### Interpretation
+
+* Interpretation
+
+ANOVA reveals a highly significant difference in Color intensity among different wine types (p < 0.001). This signifies that Color intensity significantly differs across the wine types.
+
+* Visualization
+
+```{r}
+# Boxplot for Proline content
+boxplot(Proline ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Proline Content", main = "Proline Content across Wine Types")
+```
+
+#### Additional test
+
+* Post-hoc test for Color intensity
+
+```{r}
+# Tukey's HSD for Color intensity
+color_model <- aov(Color ~ as.factor(Type), data = data)
+TukeyHSD(color_model)
+
+```
+
+* Color intensity Interpretation
+
+Statistically significant differences in Color intensity exist between all pairs of wine types (1-2, 1-3, 2-3) with p < 0.001. Each pair shows a significant difference in Color intensity.
+
+Color intensity significantly differs among all three types of wines, highlighting distinct Color intensity levels for each wine type.
+
+
+
+### **Hypothesis 4:** Proline content differs significantly across wine types.
+
+Null Hypothesis (H0): There is no significant difference in Proline content between different wine types.
+
+Alternative Hypothesis (H1): There is a significant difference in Proline content between different wine types.
+
+   - Test: ANOVA for Proline content between different wine types.
+   
+   - R Code:
+
+```{r}
+     # ANOVA for Proline among wine types
+     model <- lm(Proline ~ as.factor(Type), data = data)
+     anova(model)
+```
+
+#### Interpretation
+
+* Interpretation
+
+ANOVA indicates a highly significant difference in Proline content among different wine types (p < 0.001). This suggests significant variation in Proline content across the wine types. 
+
+* Visualization
+
+```{r}
+# Scatterplot for Ash
+plot(Ash ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Ash Content", main = "Ash Content across Wine Types")
+
+```
+
+#### Additional test
+
+* Post-hoc test for Proline
+
+```{r}
+# Tukey's HSD for Proline
+proline_model <- aov(Proline ~ as.factor(Type), data = data)
+TukeyHSD(proline_model)
+
+```
+
+* Proline Interpretation
+
+Proline content shows statistically significant differences between all pairs of wine types (1-2, 1-3, 2-3) with p < 0.05. Each pair exhibits a significant difference in Proline levels.
+
+Proline content significantly varies among all three types of wines, suggesting distinct Proline levels for each wine type.
+
+
+
+### **Hypothesis 5:** Ash and Alcalinity contribute significantly to wine type classification.
+
+* Null Hypothesis (H0): There is no significant relationship between Ash/Alcalinity and wine types.
+
+* Alternative Hypothesis (H1): There is a significant relationship between Ash/Alcalinity and wine types.
+
+   - Test: Correlation tests or t-tests comparing Ash and Alcalinity across wine types.
+   
+   - R Code:
+   
+```{r}
+     # Correlation or t-tests for Ash and Alcalinity among wine types
+
+     cor.test(data$Ash, data$Alcalinity)
+
+     # or
+
+     oneway.test(data$Ash ~ as.factor(data$Type))
+     
+     oneway.test(data$Alcalinity ~ as.factor(data$Type))
+```
+
+#### Interpretation
+
+* Interpretation
+
+Pearson's correlation and ANOVA both reveal significant relationships between Ash, Alcalinity, and wine types (p < 0.001). There's a significant correlation between Ash and Alcalinity. Additionally, both variables significantly differ among wine types. 
+
+* Visualization
+
+```{r}
+# Scatterplot for Alcalinity
+plot(Alcalinity ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Alcalinity Content", main = "Alcalinity Content across Wine Types")
+
+```
+
+#### Additional test
+
+Pairwise t-tests for Ash and Alcalinity
+
+```{r}
+# Pairwise t-tests for Ash among wine types
+pairwise.t.test(data$Ash, data$Type, p.adjust.method = "bonferroni")
+
+# Pairwise t-tests for Alcalinity among wine types
+pairwise.t.test(data$Alcalinity, data$Type, p.adjust.method = "bonferroni")
+
+```
+
+* Ash Interpretation
+
+For Ash content, the differences between wine types (1-2, 1-3, 2-3) are all statistically significant (p < 0.001, except for 3-2, p = 0.00028). Most pairs exhibit a significant difference in Ash levels except for Type 3 vs. Type 2, which is marginally insignificant.
+
+Ash content significantly differs among most pairs of wine types, indicating variations in Ash levels between wine types.
+
+* Alcalinity Interpretation
+
+Alcalinity content shows statistically significant differences between Type 1 vs. Type 2 and Type 1 vs. Type 3 (p < 0.001). However, between Type 2 and Type 3, the difference is not significant (p = 0.081).
+
+Alcalinity content significantly differs between Type 1 vs. Type 2 and Type 1 vs. Type 3 but is not significantly different between Type 2 and Type 3.
+
+### **Hypothesis 6:** The mean levels of proanthocyanins differ across the three types of wines.
+
+* Null Hypothesis (H0): The mean levels of proanthocyanins are equal across the three types of wines.
+
+* Alternative Hypothesis (H1): At least one of the mean levels of proanthocyanins differs significantly among the three types of wines.
+
+   - Test: ANOVA for Proanthocyanins content among the three types of wines.
+   
+   - R Code:
+   
+```{r}
+
+model2 <- aov(Proan ~ Type, data = data)
+summary(model2)
+
+```
+
+#### Interpretation
+
+* Interpretation
+
+The ANOVA results indicate a significant difference in mean levels of Proanthocyanins among the three types of wines (Type: 1, 2, and 3) with an F-value of 30.27 and a p-value of 5.13e-12.
+
+The 'Type' variable significantly influences the Proanthocyanins levels in wines.
+
+* Visualization aid
+
+```{r}
+boxplot(Proan ~ Type, data = data, xlab = "Wine Types", ylab = "Proanthocyanins Levels", main = "Proanthocyanins Levels across Wine Types")
+
+```
+
+#### Additional test
+
+* Post-hoc test for Proanthocyanins
+
+```{r}
+# Performing Tukey's HSD test after ANOVA
+tukey_result2 <- TukeyHSD(model2)
+tukey_result2
+```
+
+* Proanthocyanins Interpretation
+
+Proanthocyanins content shows significant differences between all pairs of wine types (1-2, 1-3, 2-3) with low adjusted p-value (0.0068, 0.000, 0.0000022, respectively). The result reveal statistically significant differences in mean levels of proanthocyanins between all pairs of wine types.
+
+All three pairwise comparisons reveal significant differences, suggesting that all types of wines significantly differ from each other in terms of proanthocyanins content.
+
+### Conclusion
+
+Based on the comprehensive chemical analysis encompassing Flavanoids, Alcohol content, Color intensity, Proline content, Ash, Alcalinity, and Proanthocyanins, it is evident that the three types of wines originating from different cultivars in the same Italian region possess distinctive chemical compositions.
+
+These findings imply that the measured chemical components play crucial roles in classifying and distinguishing between the wine types. The significant variations in these components among the wine types highlight their unique characteristics and suggest that these attributes could serve as reliable markers for classifying these wines into their respective cultivars.
+
+The additional tests confirm and further emphasize the significant differences in chemical components among the three types of wines. Flavanoids, Alcohol content, Color intensity, Proline content, Ash, and Alcalinity all exhibit distinctive levels among the wine types, contributing significantly to the classification and differentiation of the wines based on their chemical profiles.
+
+In summary, the chemical analysis provides robust evidence supporting the classification of the three types of wines based on their distinct chemical profiles, contributing to a deeper understanding of the variations and unique characteristics exhibited by each wine type derived from different cultivars in the same Italian region.
+
 
 # Duy
 
@@ -289,108 +649,6 @@ df_standardized <- as.data.frame(scale(df))
 
 # Normalize the variables
 df_normalized <- as.data.frame(scale(df, center = FALSE))
-```
-
-
-# Code của Hà
-
-```{r, echo=FALSE, warning=FALSE}
-# Packages
-library(FactoMineR)
-library(factoextra)
-library(tidyverse)
-library(corrplot)
-library(dbplyr)
-library(ggplot2)
-
-# Import data
-data <- read.csv("wine.data", 
-                 header=FALSE, 
-                 row.names=NULL)
-
-# Setting up the data
-colnames(data) <- c("Type","Alcohol", "Malic", "Ash", "Alcalinity", "Magnesium", "Phenols", "Flavanoids", "Nonflavanoids", "Proan", "Color", "Hue", "Dilution", "Proline")
-
-data$Type <- as.factor(data$Type)
-
-# Check for null values 
-colSums(is.na(data))
-
-# Research Hypotheses
-# research_hypotheses <- c("Hypothesis 1: ...", "Hypothesis 2: ...")
-
-# Statistical Hypotheses (example for t-test)
-# Assuming 'variable1' and 'variable2' are the variables of interest
-#statistical_hypotheses <- t.test(data$variable1, data$variable2)
-
-# Multivariate Analysis Considerations
-# Assuming 'data' is your dataset
-correlation_matrix <- cor(data[-1])
-corrplot(correlation_matrix)
-# Calculate correlation matrix
-
-# Principal Component Analysis (PCA)
-res.pca <- PCA(data, scale.unit=T, quali.sup="Type", graph=F)
-
-# Multiple Correspondence Analysis (MCA)
-#mca_result <- MCA(data)
-
-# Eigenvalues
-res.pca$eig
-
-# Contribution
-dimdesc(res.pca)
-
-# Cos2
-library("corrplot")
-corrplot(res.pca$var$cos2, is.corr=F)
-
-# Individuals
-plot(res.pca,
-     choix = "ind",
-     hab = "Type",
-     invisible = c("var"),
-     select = "cos2 0.6",
-     unselect = 0.7)
-
-# Variables
-plot(res.pca,
-     choix = c("var"),
-     hab = "none",
-     invisible = c("ind"),
-     select = NULL,
-     unselect = 0.7)
-
-# Correspondence Analysis
-res.ca <- CA(data, quali.sup="Type", graph=F)
-
-plot(res.ca, 
-     invisible="col",
-     selectRow = "cos2 100",
-     unselect = 1
-     )
-
-plot(res.ca, 
-     invisible="row",
-     selectCol = NULL,
-     unselect = 1
-     )
-
-# Thử Multiple Factor Analysis (MFA)
-gr1 = data[1]
-gr2 = data.frame(data[7:10], data[13])
-gr3 = data.frame(data[2], data[11])
-gr4 = data.frame(data[12], data[14])
-gr5 = data[6]
-gr6 = data[3]
-data.cat = data.frame(gr1, gr2, gr3, gr4, gr5, gr6)
-
-res.mfa <- MFA(data.cat,
-               group = c(1, 5, 2, 2, 1, 1),
-               type = c("n", rep("c",5)),
-               name.group = c("Group1", "Group2", "Group3", "Group4", "Group5","Group6"),
-               num.group.sup = c(1),
-               graph = F)
 ```
 
 
