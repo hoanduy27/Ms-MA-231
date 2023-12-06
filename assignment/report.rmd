@@ -48,7 +48,8 @@ variables <- colnames(df)
 for (variable in variables) {
   unique_values <- unique(df[[variable]])
   num_unique_values <- length(unique_values)
- ## Quantity and meaning
+  
+  ## Quantity and meaning
   if (is.numeric(df[[variable]])) {
     quantity <- "Measured Quantity"
     meaning <- "Numeric Value"
@@ -60,20 +61,20 @@ for (variable in variables) {
     meaning <- "Unknown"
   }
   
-  ##Measurement quantity
-  if (data_type %in% c("numeric", "integer", "double")) {
+  ## Measurement quantity
+  if (is.numeric(df[[variable]]) || is.integer(df[[variable]]) || is.double(df[[variable]])) {
     measurement_quantity <- "Numerical"
-  } else if (data_type %in% c("character", "factor")) {
+  } else if (is.character(df[[variable]]) || is.factor(df[[variable]])) {
     measurement_quantity <- "Categorical"
   } else {
     measurement_quantity <- "Unknown"
   }
   
-  ##Scale type & Measurement type
-  if (data_type %in% c("numeric", "integer", "double")) {
-    scale_type <- ifelse(length(unique(df[[variable]])) > 10, "Continuous", "Discrete")
+  ## Scale type & Measurement type
+  if (is.numeric(df[[variable]]) || is.integer(df[[variable]]) || is.double(df[[variable]])) {
+    scale_type <- ifelse(num_unique_values > 10, "Continuous", "Discrete")
     measurement_type <- "Quantitative"
-  } else if (data_type %in% c("character", "factor")) {
+  } else if (is.character(df[[variable]]) || is.factor(df[[variable]])) {
     scale_type <- "Qualitative"
     measurement_type <- "Qualitative"
   } else {
@@ -513,6 +514,55 @@ The additional tests confirm and further emphasize the significant differences i
 
 In summary, the chemical analysis provides robust evidence supporting the classification of the three types of wines based on their distinct chemical profiles, contributing to a deeper understanding of the variations and unique characteristics exhibited by each wine type derived from different cultivars in the same Italian region.
 
+#Uyen
+
+##Descriptive Statistics
+```{r}
+
+# Define the Mode function
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+# Variables to analyze
+key_numeric_variables <- c(
+  "Alcohol",
+  "Malic.acid",
+  "Ash",
+  "Alcalinity.of.ash",
+  "Magnesium",
+  "Total.phenols",
+  "Flavanoids",
+  "Nonflavanoid.phenols",
+  "Proanthocyanins",
+  "Color.intensity",
+  "Hue",
+  "OD280/OD315.of.diluted.wines",
+  "Proline"
+)
+
+# Descriptive statistics for key numeric variables
+numeric_summary <- summary(df[, key_numeric_variables])
+
+# Print the summary
+print(numeric_summary)
+
+# Calculate and print mean, median, mode, and standard deviation for each numeric variable
+for (variable in key_numeric_variables) {
+  mean_value <- mean(df[[variable]])
+  median_value <- median(df[[variable]])
+  mode_value <- Mode(df[[variable]])
+  sd_value <- sd(df[[variable]])
+
+  cat("Variable:", variable, "\n")
+  cat("Mean:", mean_value, "\n")
+  cat("Median:", median_value, "\n")
+  cat("Mode:", mode_value, "\n")
+  cat("Standard Deviation:", sd_value, "\n")
+  cat("------------------------------\n")
+}
+```
 
 # Duy
 
@@ -675,6 +725,33 @@ ggplot(df, aes(x = Alcohol, y = Color.intensity, color = class)) +
 
 
 # 4. Conclusions
+#Uyen: Relate statistical significance to the real-world problem.
+
+- Flavanoids Differentiation (Hypothesis 1):
+
+Winemakers can leverage this information to tailor the Flavanoid content in wines, influencing the taste, aroma, and overall sensory experience. Consumers, on the other hand, can use Flavanoid levels as a factor in selecting wines based on their preferred flavor profiles.
+
+- Alcohol Content Variation (Hypothesis 2):
+ Winemakers can adjust Alcohol content to create wines with specific characteristics, catering to different preferences and occasions. Consumers may use this information to make choices based on desired Alcohol levels in wines. 
+ 
+- Color Intensity Variation (Hypothesis 3):
+
+Winemakers can optimize Color intensity to create visually distinct wines. Consumers may consider color as a factor in wine selection, associating it with taste preferences or the overall appeal of the wine.
+
+- Proline Content Differences (Hypothesis 4):
+
+Proline is associated with taste and quality. Winemakers can use this information to craft wines with specific flavor profiles. Consumers looking for particular taste characteristics can consider Proline content in their wine choices.
+
+- Ash and Alcalinity Influence (Hypothesis 5):
+
+The significant relationships between Ash, Alcalinity, and wine types suggest that these components contribute to the classification of wines. Winemakers can use this information to adjust and optimize these elements to achieve desired characteristics in their wines.
+
+- Proanthocyanins Role (Hypothesis 6):
+
+The significant differences in Proanthocyanins content among wine types indicate that this component is a key factor in differentiating between the wines. Understanding the role of Proanthocyanins is valuable for winemakers aiming to create wines with specific taste profiles.
+
+- Overall Conclusion: In essence, the statistical significance of these chemical components in wine types provides actionable insights for both winemakers and consumers. It enables winemakers to craft wines with specific characteristics and empowers consumers to make informed choices based on their preferences, whether related to flavor, visual appeal, or health considerations.
+
 Propose practical recommendations for refining or improving the data table:
 a. Check for Consistency
 
