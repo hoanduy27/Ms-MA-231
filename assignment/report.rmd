@@ -114,6 +114,35 @@ data <- read.csv("wine.data",
 # Setting up the data
 colnames(data) <- c("Type","Alcohol", "Malic", "Ash", "Alcalinity", "Magnesium", "Phenols", "Flavanoids", "Nonflavanoids", "Proan", "Color", "Hue", "Dilution", "Proline")
 
+# Remove outliers
+handle_outlier <- function(df){
+  outliers = rep(FALSE, nrow(df))
+
+  for (col in colnames(df)){
+    if (col != "Type"){
+      Q1 <- quantile(df[, col], 0.25)
+      Q3 <- quantile(df[, col], 0.75)
+      IQR <- Q3 - Q1
+
+      # Identify outliers
+      outliers <- (outliers | (
+                          df[, col] < (Q1 - 1.5 * IQR) 
+                          | df[, col] > (Q3 + 1.5 * IQR) 
+                      ))
+
+    }
+  }
+
+  print("Outliers:")
+  print(df[outliers, ])
+
+  df_clean <- df[!outliers, ]
+
+  return(df_clean)
+}
+
+data <- handle_outlier(data)
+
 data$Type <- as.factor(data$Type)
 
 # Check for null values 
@@ -230,7 +259,16 @@ Conclusion: This suggests that Flavanoids significantly vary across the wine typ
 # Boxplot for Flavanoids
 boxplot(Flavanoids ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Flavanoids Content", main = "Flavanoids Content across Wine Types")
 
+plot.PCA(res.pca,
+     choix = "ind",
+     hab = "Flavanoids",
+     invisible = c("var"),
+     select = "cos2 0.6",
+     unselect = 0.7,
+)
 ```
+
+We can see the difference of flavanoids content accross different types of alcohol. The box plot shows that alcohols Type 1 have the highest Flavanoids content, while the lowest belongs to Type 3. Recall the variable PCA plot, the Flavanoids content is strongly positive correlated with dimension 1, which is also appropriate with the above individual PCA plot. We can see that all alcohols of Type 3 lie in the left of dimension 1, therefore their Flavanoids contents are the lowest. Type 2 alcohols mostly lie in the middle of dimension 1, so that their Flavanoids content is in the average. On the other hand, Type 3 alcohols lie completely in the right side of dimension 1, which makes them have the highest conent of Flavanoids.
 
 #### Additional test
 
@@ -277,7 +315,17 @@ ANOVA indicates a highly significant difference in Alcohol content among differe
 ```{r}
 # Boxplot for Alcohol
 boxplot(Alcohol ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Alcohol Content", main = "Alcohol Content across Wine Types")
+
+plot.PCA(res.pca,
+     choix = "ind",
+     hab = "Alcohol",
+     invisible = c("var"),
+     select = "cos2 0.6",
+     unselect = 0.7,
+)
 ```
+
+From the box plot, we can see that alcohols of Type 1 and Type 3 have higher alcohol levels than ones from Type 2. The different in alcohol level accross different types can also be supported by the PCA individual graph. In this graph, alcohols of type 2 is positioned in the bottom of dimension 2, which indicates the lowest alcohol level. This observation is consistent with the PCA variable graph, which highlights strong correlation (0.76) and high cos2 (0.58) with between alcohol level and dimension 2. Alcohols type 1 and type 3 almost have the same position when projected to dimension 2, but alcohol contents in type 1 are slightly higher than those in type 2. This is due to that Alcohol level also has correlation with dimension 1 (cor=0.31, cos2=0.10). Type 1 alcohols mostly lie in the right side of dimension 1, while Type 3 alcohols are positioned in the left of this dimension.
 
 #### Additional test
 
@@ -323,9 +371,36 @@ ANOVA reveals a highly significant difference in Color intensity among different
 * Visualization
 
 ```{r}
-# Boxplot for Proline content
-boxplot(Proline ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Proline Content", main = "Proline Content across Wine Types")
+# Boxplot for Color intensity
+boxplot(Color ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Color Intensity", main = "Color Intensity across Wine Types")
+
+plot.PCA(res.pca,
+  choix = "ind",
+  hab = c("Color"),
+  invisible = c("var"),
+  select = "cos2 0.6",
+  unselect = 0.7,
+)
 ```
+
+On average, color intensity of Type 3 alcohol is the highest, while type 2 alcohol is the lowest. The PCA variable graph shows that color intensity has strong correlation and high cos2 with dimension 2, which indicates that alcohol lying at the lower position of dimension 2 (type 2 alcohol) tends to have lower color intensity compare to those positioned higher (type 1 and type 3 alcohol). 
+
+Comparing type 1 and type 3, alcohol of type 3 generally have higher color intensity than that from type 1 which has the same position on dimension 2. This is due to that Color intensity have negative correlation and negative cos2 with dimension 1. For example, let us consider the pairs (4, 150), (53, 168) and (52, 133). Alcohols in each pair have similar positions on dimension, but from different types (type 1 and type 3). It can be observed that type 3 alcohol in each pair has higher intensity. 
+
+```{r}
+ res.pca$ind$coord[c("4","150","53","168","52","133"),"Dim.2"]
+ data[c("4","150","53","168","52","133"),]
+```
+
+The large variation of color intensity of Type 3 alcohol can also be demonstrated clearly from PCA individual graph. Alcohols from this type span accross dimension the upper region of dimension 2. In contrast, alcohols of type 1 are more concentrated around their centroid, which indicates less variation in color intensity. 
+
+```{r}
+  # Type 3 alcohols
+  data[c("84","164","175","154","178", "176"),]
+  # Type 1 alcohols
+  data[c("23","41","6","17","4"),]
+```
+
 
 #### Additional test
 
@@ -371,10 +446,20 @@ ANOVA indicates a highly significant difference in Proline content among differe
 * Visualization
 
 ```{r}
-# Scatterplot for Ash
-plot(Ash ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Ash Content", main = "Ash Content across Wine Types")
+# Scatterplot for Proline
+plot(Proline ~ as.factor(Type), data = data, xlab = "Wine Type", ylab = "Proline", main = "Proline across Wine Types")
 
+plot.PCA(res.pca,
+  choix = "ind",
+  hab = c("Proline"),
+  invisible = c("var"),
+  select = "cos2 0.6",
+  unselect = 0.7,
+)
 ```
+
+The PCA variable grap reveals that Proline has high correlation and cos2 on both dimension in the main axes (dimension 1: cor=0.62, cos2=0.39; dimension 2: cor=0.58, cos2=0.33). Therefore, alcohols located in the 1st quadrant generally have higher Proline than alcohols located in other quadrants. As can be seen from PCA individual graph, type 3 alcohols which are predominantly positioned in the 1st quadrant tend to have the highest Proline levels among other types. On the other hand, type 2 alcohols which lie at the lower position of dimension 2, and type 1 alcohols which are positioned on the left side of dimension 1, both have lower level of Proline comparing to type 3 alcohol.
+
 
 #### Additional test
 
@@ -486,7 +571,17 @@ The 'Type' variable significantly influences the Proanthocyanins levels in wines
 ```{r}
 boxplot(Proan ~ Type, data = data, xlab = "Wine Types", ylab = "Proanthocyanins Levels", main = "Proanthocyanins Levels across Wine Types")
 
+plot.PCA(res.pca,
+  choix = "ind",
+  hab = c("Proan"),
+  invisible = c("var"),
+  select = "cos2 0.6",
+  unselect = 0.7,
+)
+
 ```
+
+From the box plot and PCA individual graph, it can be observed that Type 2 alcohols have the highest level of Proanthocyanins. However, the differences of Proanthocyanins level between type 2 alcohols and other types are not too large. This can be explained by observing PCA variable graph, where correlation and cos2 of Proanthocyanins to dimension is not so large (cor = 0.68, cos2 = 0.46). 
 
 #### Additional test
 
